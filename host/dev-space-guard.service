@@ -1,0 +1,6 @@
+[Unit]
+Description=Watch free space on the dev box's SSD
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dev-space-guard.sh

@@ -1,0 +1,6 @@
+[Unit]
+Description=Alert when a dev box agent session has gone quiet
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dev-agents-guard.sh

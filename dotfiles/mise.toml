@@ -1,0 +1,11 @@
+# Toolchains for the dev box, installed by mise (dev/provision.sh).
+#
+# Node 22 LTS: both Claude Code's and Codex's npm builds need Node 22 or newer
+# (aq.dev, 2026-09), and it is the safest common denominator across the repos.
+# Go is here only because some tooling expects it; no current repo needs it.
+[tools]
+node = "22"
+bun = "latest"
+python = "3.13"
+rust = "stable"
+go = "1.23"

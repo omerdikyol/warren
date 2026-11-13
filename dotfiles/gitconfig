@@ -1,0 +1,16 @@
+[user]
+	name = Your Name
+	email = you@example.com
+[init]
+	defaultBranch = main
+[push]
+	autoSetupRemote = true
+# Never fast-forward silently on the dev box: a diverged branch is a signal, not
+# something to paper over. Matches "dev.sh repos sync" leaving local work alone.
+[pull]
+	ff = only
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f

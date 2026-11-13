@@ -1,0 +1,9 @@
+[Unit]
+Description=Collect what the coding agents are doing on the dev box
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/bin/dev-agents.py --out /run/tezb-dashboard/dev-agents.json
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

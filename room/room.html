@@ -1,0 +1,101 @@
+<!doctype html>
+<!-- warren's room on its own: the same scene the dashboard shows, full window.
+     Handy as a wall display. `?mock=1` draws invented sessions covering every
+     state, so it works with no dev box behind it. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>warren</title>
+<link rel="stylesheet" href="room.css">
+<style>html, body { height: 100%; }</style>
+</head>
+<body class="room-standalone">
+<section id="room"></section>
+<script type="module">
+import { renderRoom3D, captureDataURL } from "./room3d.js";
+
+// surface any failure in the DOM (and the title) so a headless run can read it
+const note = (m) => {
+  document.title = "ERR " + m;
+  const d = document.createElement("pre");
+  d.style.cssText = "position:fixed;left:0;bottom:0;z-index:99;background:#300;color:#fbb;padding:8px;font:11px monospace;white-space:pre-wrap";
+  d.textContent = "ERROR: " + m;
+  document.body.append(d);
+};
+window.addEventListener("error", (e) => note(e.message + " @ " + (e.filename || "") + ":" + (e.lineno || "")));
+window.addEventListener("unhandledrejection", (e) => note((e.reason && e.reason.stack) || e.reason));
+
+const MOCK = {
+  live: [
+    { name: "fix-auth", agent: "claude", status: "working", state: "live", repo: "jobtrack", branch: "fix-auth",
+      runtime_seconds: 742, idle_seconds: 3, changed_files: 3, changed_sample: "jobtrack/auth.py",
+      activity: "test result: ok. 47 passed", activity_kind: "output",
+      last_command: "uv run pytest -q", log: "/home/omerdev/.local/state/dev/logs/fix-auth.log",
+      last_lines: ["$ uv run pytest -q", "..... 47 passed in 3.2s"] },
+    { name: "refactor-ui", agent: "codex", status: "waiting", state: "live", repo: "web-app", branch: "main",
+      runtime_seconds: 1830, idle_seconds: 240, changed_files: 11, changed_sample: "src/sidebar.tsx",
+      activity: "waiting for confirmation to rewrite the sidebar", activity_kind: "output",
+      last_command: "npm run typecheck", log: "/home/omerdev/.local/state/dev/logs/refactor-ui.log",
+      last_lines: ["$ npm run typecheck", "waiting for confirmation"] },
+    { name: "research-notes", agent: "omp", status: "stale", state: "live", repo: "notes", branch: "main",
+      runtime_seconds: 4200, idle_seconds: 1860, changed_files: 0,
+      activity: "Allow this tool? (y/n)", activity_kind: "output",
+      log: "/home/omerdev/.local/state/dev/logs/research-notes.log", last_lines: ["Allow this tool? (y/n)"] },
+    { name: "read-tests", agent: "opencode", status: "working", state: "live", repo: "netmeter", branch: "main",
+      runtime_seconds: 300, idle_seconds: 2, changed_files: 1, changed_sample: "crates/netmeter-core/src/lib.rs",
+      activity: "cargo test -p netmeter-core", activity_kind: "command",
+      last_command: "cargo test -p netmeter-core", log: "/home/omerdev/.local/state/dev/logs/read-tests.log",
+      last_lines: ["$ cargo test -p netmeter-core", "running 24 tests"] },
+    { name: "scratch", agent: null, status: "shell", state: "live", repo: "opencode-resume", branch: "main",
+      runtime_seconds: 90, idle_seconds: 40, changed_files: 0, activity: "$ ls", activity_kind: "command",
+      log: null, last_lines: ["$ ls"] },
+    { name: "docs", agent: "agy", status: "working", state: "live", repo: "api-server", branch: "main",
+      runtime_seconds: 96, idle_seconds: 1, changed_files: 2, changed_sample: "docs/usage.md",
+      activity: "writing docs/usage.md", activity_kind: "output", last_command: "agy",
+      log: "/home/omerdev/.local/state/dev/logs/docs.log", last_lines: ["writing docs/usage.md"] },
+  ],
+  ended: [
+    { name: "old-task", agent: "cmd", status: "ended", state: "ended", repo: "summariser", branch: "main",
+      runtime_seconds: 9000, idle_seconds: 60, ended_at: Math.floor(Date.now() / 1000) - 5400,
+      log: "/home/omerdev/.local/state/dev/logs/old-task.log", last_lines: ["done — pushed 2 commits"] },
+  ],
+  stale_after_seconds: 900,
+};
+
+const params = new URLSearchParams(location.search);
+if (params.has("stills")) window.__stills = Number(params.get("stills")) || 40;
+const useMock = params.get("mock") === "1";
+const root = document.getElementById("room");
+
+if (useMock) renderRoom3D(root, { agents: { data: MOCK } });   // synchronously, so a capture sees it
+
+if (params.has("shot")) {
+  setTimeout(() => {
+    const pre = document.createElement("pre");
+    pre.id = "shot";
+    pre.textContent = captureDataURL();
+    document.body.append(pre);
+    document.title = "SHOT " + pre.textContent.length;
+  }, params.has("stills") ? 250 : 1400);
+}
+
+async function feed() {
+  if (useMock) return { agents: { data: MOCK } };
+  try {
+    const r = await fetch("api/data", { cache: "no-store" });
+    if (!r.ok) throw new Error("http " + r.status);
+    return await r.json();
+  } catch {
+    return { agents: { data: MOCK } };       // no server behind it: show a preview
+  }
+}
+
+async function loop() {
+  try { renderRoom3D(root, await feed()); } catch (err) { note((err && err.stack) || err); }
+  setTimeout(loop, useMock ? 5000 : 15000);
+}
+loop();
+</script>
+</body>
+</html>

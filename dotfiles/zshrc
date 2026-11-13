@@ -1,0 +1,25 @@
+# dev box shell. Repos and caches point at the USB NVMe SSD (/srv/backup-usb);
+# secrets stay on the HDD under ~/.config/dev.
+export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$HOME/.bun/bin:$PATH"
+export DEV_ROOT=/srv/backup-usb/dev
+export CARGO_HOME="$DEV_ROOT/cache/cargo"
+export CARGO_TARGET_DIR="$DEV_ROOT/cache/cargo/target"
+export UV_CACHE_DIR="$DEV_ROOT/cache/uv"
+export npm_config_cache="$DEV_ROOT/cache/npm"
+export BUN_INSTALL_CACHE_DIR="$DEV_ROOT/cache/bun"
+export MISE_CACHE_DIR="$DEV_ROOT/cache/mise"
+
+# Toolchains are managed by mise (see ~/.config/mise/config.toml).
+command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+
+HISTFILE=$HOME/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt hist_ignore_dups share_history
+
+# Secrets: one file per concern, sourced if present. Never committed.
+for f in "$HOME"/.config/dev/*.env(N); do . "$f"; done
+
+alias ll='ls -lah'
+alias gs='git status -sb'
+alias dev='$HOME/dev.sh'

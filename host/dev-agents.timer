@@ -1,0 +1,11 @@
+[Unit]
+Description=Collect the dev box agent state every 30 seconds
+
+[Timer]
+OnBootSec=2min
+# The dashboard reads the file this writes; 30 s is fast enough to see an agent
+# start or stop, and it is two `tmux list` calls plus a walk of /proc.
+OnUnitActiveSec=30s
+
+[Install]
+WantedBy=timers.target

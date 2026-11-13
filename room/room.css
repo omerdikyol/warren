@@ -1,0 +1,158 @@
+/* warren — the frame around the room. The scene is three.js (room3d.js); this
+ * is the bright little window in a dark page, the HTML desk cards, the camera
+ * HUD and the detail panel. Text lives here rather than in the 3D scene so it
+ * stays sharp at any zoom. */
+
+/* `hidden` alone loses to the author rule that makes #grid a grid */
+#grid[hidden], #room[hidden] { display: none !important; }
+
+#room {
+  position: relative;
+  height: min(78vh, 840px);
+  margin: 10px 0 26px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #cfe8ff;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .06);
+}
+
+.room-stage { position: absolute; inset: 0; }
+
+/* ------------------------------------------------------------- desk cards */
+.room-tags { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 3; }
+
+.tag {
+  position: absolute;
+  left: 0; top: 0;
+  transform-origin: 50% 100%;
+  width: 224px;
+  padding: 6px 10px 7px;
+  border-radius: 11px;
+  border-left: 3px solid #b9b2a6;
+  background: rgba(255, 253, 249, .96);
+  box-shadow: 0 6px 16px rgba(70, 50, 30, .16), 0 0 0 1px rgba(120, 95, 70, .09);
+  font: 500 11.5px/1.32 ui-rounded, "Nunito", "Segoe UI", system-ui, sans-serif;
+  color: #4a3d33;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: box-shadow .15s, border-color .15s;
+}
+.tag:hover { box-shadow: 0 9px 22px rgba(70, 50, 30, .24), 0 0 0 1px rgba(120, 95, 70, .16); }
+.tag.selected { box-shadow: 0 10px 26px rgba(70, 50, 30, .26), 0 0 0 2px #c9694a; }
+
+.tag-top { display: flex; align-items: center; gap: 5px; }
+.tag-top b {
+  font-size: 12.5px; font-weight: 700; color: #3b3129;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.tag-top .agent { font-size: 9.5px; color: #9a8b7c; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #b9b2a6; flex: 0 0 auto; }
+.tag-doing {
+  margin-top: 2px;
+  font: 11px/1.35 ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color: #5f5348;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.tag-meta { margin-top: 1px; font-size: 9.5px; color: #a0927f; overflow: hidden; text-overflow: ellipsis; }
+
+.tag.status-working { border-left-color: #4caf7d; }
+.tag.status-working .dot { background: #4caf7d; }
+.tag.status-waiting { border-left-color: #e8a94e; }
+.tag.status-waiting .dot { background: #e8a94e; }
+.tag.status-stale { border-left-color: #e2695a; }
+.tag.status-stale .dot { background: #e2695a; }
+.tag.status-shell { border-left-color: #8ba0b8; }
+.tag.status-shell .dot { background: #8ba0b8; }
+.tag.status-ended { border-left-color: #b0a89c; opacity: .72; }
+.tag.status-ended .dot { background: #b0a89c; }
+
+/* ---------------------------------------------------------------- the HUD */
+.room-hud {
+  position: absolute; left: 14px; bottom: 14px; z-index: 4;
+  display: flex; align-items: center; gap: 6px;
+}
+.room-hud button {
+  width: 29px; height: 29px;
+  border: 0; border-radius: 9px;
+  background: rgba(255, 253, 248, .93);
+  color: #5b4c3e; font-size: 15px; line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(70, 50, 30, .16);
+}
+.room-hud button:hover { background: #fff; }
+.room-hud button:active { transform: translateY(1px); }
+.room-hint {
+  margin-left: 4px; padding: 5px 9px; border-radius: 999px;
+  background: rgba(255, 253, 248, .78);
+  font: 10.5px/1 ui-rounded, "Nunito", "Segoe UI", system-ui, sans-serif;
+  color: #6b5b4a;
+}
+
+/* --------------------------------------------------------- the detail card */
+.room-card {
+  position: absolute; right: 14px; bottom: 14px; z-index: 4;
+  width: min(390px, calc(100% - 28px));
+  max-height: 48%;
+  overflow: auto;
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: rgba(255, 253, 248, .97);
+  box-shadow: 0 12px 28px rgba(70, 50, 30, .22);
+  font: 11px/1.5 ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color: #5b4c3e;
+}
+.room-card b {
+  display: block; margin-bottom: 6px;
+  color: #c9694a;
+  font: 700 12.5px/1.2 ui-rounded, "Nunito", system-ui, sans-serif;
+}
+.room-card .kv { display: flex; gap: 8px; }
+.room-card .kv .k { flex: 0 0 62px; color: #a2937f; }
+.room-card .kv span:last-child { overflow-wrap: anywhere; }
+.room-card pre {
+  margin: 8px 0 0; padding: 7px 9px; border-radius: 8px;
+  background: #2b2f36; color: #e8e0d4;
+  max-height: 150px; overflow: auto;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* a caption when nothing is running and the desks are memories */
+.room-note {
+  position: absolute; left: 50%; top: 12px; transform: translateX(-50%);
+  z-index: 4; padding: 6px 12px; border-radius: 999px;
+  background: rgba(255, 253, 248, .88);
+  box-shadow: 0 4px 14px rgba(70, 50, 30, .16);
+  font: 500 11.5px/1 ui-rounded, "Nunito", "Segoe UI", system-ui, sans-serif;
+  color: #6b5b4a;
+}
+.room-note[hidden] { display: none !important; }
+
+/* ------------------------------------------------------------ quiet room */
+.room-empty {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; pointer-events: none;
+  color: #6b5b4a;
+  font: 500 13px/1.5 ui-rounded, "Nunito", "Segoe UI", system-ui, sans-serif;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .55);
+}
+.room-empty[hidden] { display: none !important; }
+.room-empty b { font-size: 19px; }
+.room-empty code {
+  padding: 2px 6px; border-radius: 6px;
+  background: rgba(255, 255, 255, .75);
+  font-family: ui-monospace, monospace;
+}
+
+/* the standalone page fills the window */
+body.room-standalone { margin: 0; background: #cfe8ff; }
+body.room-standalone #room { height: 100vh; margin: 0; border-radius: 0; box-shadow: none; }
+
+@media (max-width: 760px) {
+  #room { height: min(66vh, 540px); border-radius: 14px; }
+  .tag { width: 186px; }
+  .tag-doing { font-size: 9.5px; }
+  .room-hint { display: none; }
+  .room-card { width: calc(100% - 24px); max-height: 42%; right: 12px; bottom: 56px; }
+}

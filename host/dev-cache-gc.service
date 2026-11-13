@@ -1,0 +1,9 @@
+[Unit]
+Description=Prune the dev box build caches
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dev-cache-gc.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

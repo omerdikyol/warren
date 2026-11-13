@@ -1,0 +1,19 @@
+# Repositories to keep on the tezb dev box. Tab-separated.
+# name <TAB> remote <TAB> branch <TAB> linux <TAB> notes
+#
+# linux: yes      builds and runs on tezb
+#        partial  edits here, but the shippable artifact is built on the Mac
+#        no       macOS-only app; kept here so agents can read and edit it
+#
+# Every remote is https:// and authenticates through the GitHub CLI's credential
+# helper (`gh auth login` then `gh auth setup-git`), which stores an absolute path
+# to gh, so it also works in a non-interactive shell. One account then covers the
+# public and the private repositories, and no SSH key has to be managed.
+# branch "-" means the remote's default branch. dev.sh repos sync clones the
+# missing ones and fast-forwards the rest; it never force-updates a local branch.
+jobtrack	https://github.com/omerdikyol/jobtrack.git	-	yes	Python, uv, pytest. Same source as the jobtrack container on tezb.
+discord-desync	https://github.com/omerdikyol/discord-desync.git	-	no	macOS Swift app plus the byedpi submodule; build on the Mac.
+predictive-dt-5g-rrc	https://github.com/omerdikyol/rrc-storm-dt.git	-	yes	Python; SimPy simulation plus LaTeX.
+netmeter	https://github.com/omerdikyol/netmeter.git	-	partial	Rust; netmeter-core tests run on Linux, the menu-bar app does not.
+opencode-resume	https://github.com/omerdikyol/opencode-resume.git	-	yes	zsh script; installs the "opencode -r" session picker.
+oh-my-pi	https://github.com/omerdikyol/oh-my-pi.git	-	yes	Your omp fork; bun plus Rust, the heaviest build of the set.

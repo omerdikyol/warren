@@ -1,0 +1,9 @@
+[Unit]
+Description=Prune the dev box build caches weekly
+
+[Timer]
+OnCalendar=Sun 09:30:00 Europe/Istanbul
+Persistent=true
+
+[Install]
+WantedBy=timers.target
